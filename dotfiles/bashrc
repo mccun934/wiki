@@ -1,0 +1,30 @@
+# .bashrc
+
+function lg() {
+  ssh root@172.31.1.$1
+}
+
+function named-el62() {
+  xhost +
+  sudo snap-guest -b rhel62-base -t $1 -m 2000 -c 1 -d pdx.redhat.com
+}
+
+
+
+function el62guest() {
+  xhost +
+  sudo snap-guest -b rhel62-base -t g-`date +%m%d%H%M` -m 2000 -c 1 -d pdx.redhat.com
+}
+
+function f17guest() {
+  xhost +
+  sudo snap-guest -b f17-base -t gf17-`date +%m%d%H%M` -m 2000 -c 1 -d pdx.redhat.com
+}
+
+function named-f17() {
+  xhost +
+  sudo snap-guest -b f17-base -t $1 -m 2000 -c 1 -d pdx.redhat.com
+}
+
+
+
