@@ -1,14 +1,54 @@
 # .bashrc
 
+
+
+check_machine()
+{
+    machine=$1
+    ping -c 3 -w 5 $machine > /dev/null 2>&1 
+    retval=$?
+    if [ $retval -ne 0 ]; then
+        # The machine doesn't respond to pings, retrying later
+        echo "Machine down..." >&2
+        return $retval
+    fi
+    ssh root@$machine "echo 1 > /dev/null"
+    retval=$?
+    echo "ssh retval: $retval" >&2
+    return $retval
+}
+
+checkmachine() {
+    declare -i TRIES=60
+    while [ $TRIES -gt 0 ]; do
+        check_machine $1
+        if [ $? -eq 0 ]; then
+            break
+        fi
+        TRIES=$[$TRIES-1]
+        echo "Trying to connect to $FQDN $TRIES more time(s) after some sleep..."
+        sleep 1
+    done
+}
+
+
+
+
 function lg() {
   ssh root@172.31.1.$1
 }
 
-function named-el62() {
-  xhost +
-  sudo snap-guest -b rhel62-base -t $1 -m 2000 -c 1 -d pdx.redhat.com
+function lgn() {
+  ssh root@$1.local
 }
 
+function named-el63() {
+  xhost +
+  sudo snap-guest -b rhel63-base -t $1 -m 2000 -c 1 -d pdx.redhat.com
+  checkmachine $1.local
+  ssh root@$1.local
+
+}
 
 
 function el62guest() {
@@ -18,13 +58,21 @@ function el62guest() {
 
 function f17guest() {
   xhost +
-  sudo snap-guest -b f17-base -t gf17-`date +%m%d%H%M` -m 2000 -c 1 -d pdx.redhat.com
+  GNAME=gf17-`date +%m%d%H%M`
+  sudo snap-guest -b f17-base -t $GNAME -m 2000 -c 1 -d pdx.redhat.com
+  checkmachine $GNAME.local
+  ssh root@$GNAME.local
 }
 
 function named-f17() {
   xhost +
   sudo snap-guest -b f17-base -t $1 -m 2000 -c 1 -d pdx.redhat.com
+  ssh_machine $1.local
 }
 
 
+function ktnguest() {
+  xhost +
+  sudo snap-guest -b kt-nightly-base -t ktn -m 4000 -c 2
+}
 
